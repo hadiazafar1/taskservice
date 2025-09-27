@@ -2,7 +2,6 @@ package com.example.taskservice.dto;
 
 import java.time.LocalDateTime;
 
-import com.example.taskservice.model.Task;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

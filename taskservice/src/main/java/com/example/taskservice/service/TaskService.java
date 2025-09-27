@@ -6,6 +6,8 @@ import com.example.taskservice.messaging.TaskCreatedEvent;
 import com.example.taskservice.messaging.TaskEventPublisher;
 import com.example.taskservice.model.Task;
 import com.example.taskservice.repository.TaskRepository;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +24,7 @@ public class TaskService {
         this.eventPublisher = eventPublisher;
     }
 
+  
     public Task createTask(TaskRequest request) {
         Task task = new Task(
                 request.title,

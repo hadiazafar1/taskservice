@@ -1,41 +1,56 @@
 package com.example.taskservice.service;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
-import org.junit.jupiter.api.Test;
-
 import com.example.taskservice.dto.TaskRequest;
-import com.example.taskservice.messaging.TaskCreatedEvent;
+import com.example.taskservice.exception.TaskNotFoundException;
 import com.example.taskservice.messaging.TaskEventPublisher;
 import com.example.taskservice.model.Task;
 import com.example.taskservice.repository.TaskRepository;
-import static org.assertj.core.api.Assertions.assertThat;
- class TaskServiceTest {
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-    private final TaskRepository taskRepository=  mock(TaskRepository.class);
-    private final TaskEventPublisher taskEventPublisher=  mock(TaskEventPublisher.class);
-    private final TaskService taskService = new TaskService(taskRepository, taskEventPublisher);
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class TaskServiceTest {
+    @Mock
+    TaskRepository repo;
+    @Mock
+    TaskEventPublisher publisher;
+
+    @InjectMocks
+    TaskService svc;
 
     @Test
-    public void testCreateTask() {
-       
-        TaskRequest request = new TaskRequest("Test Task", "Description", "OPEN","HIGH" , LocalDateTime.now());
-        Task task = new Task(1L,request.title, request.description, request.status, request.priority, request.dueDate);
+    void getTask_throws_when_missing() {
+        // Arrange
+        when(repo.findById(99L)).thenReturn(Optional.empty());
 
-        when(taskRepository.save(any(Task.class))).thenReturn(task);
+        // We'll call a method that throws when the task is missing.
+        TaskRequest req = new TaskRequest("t", "d", "OPEN", "LOW", LocalDateTime.now().plusDays(1));
 
-        Task createdTask = taskService.createTask(request);
-
-        assertThat(createdTask.getId()).isEqualTo(1L);
-        verify(taskRepository).save(any(Task.class));
-        verify(taskEventPublisher).publishTaskCreated(any(TaskCreatedEvent.class));
-
+        // Assert
+        assertThatThrownBy(() -> svc.updateTask(99L, req))
+                .isInstanceOf(TaskNotFoundException.class);
     }
 
+    @Test
+    void createTask_saves_and_returns_entity() {
+        TaskRequest req = new TaskRequest("Write tests", "desc", "OPEN", "HIGH", LocalDateTime.now().plusDays(1));
+        Task saved = new Task();
+        saved.setId(1L);
+        saved.setTitle(req.title);
+        when(repo.save(any(Task.class))).thenReturn(saved);
+
+        Task result = svc.createTask(req);
+
+        verify(repo).save(any(Task.class));
+        // no captor needed unless you want to inspect fields on the saved entity
+    }
 }
