@@ -59,12 +59,6 @@ PUT	/api/tasks/{id}	Update a task
 📦 RabbitMQ
 UI: http://localhost:15672
 
-Default credentials:
-
-Username: guest
-
-Password: guest
-
 The service publishes a TaskCreatedEvent when a new task is created.
 
 🧪 Running Tests
