@@ -6,9 +6,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.core.AmqpAdmin;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,14 +24,19 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@AutoConfigureMockMvc // harmless here; we still use RestTemplate
 class AuthAndTasksFlowIT {
+
+  // --- Mock ALL RabbitMQ infrastructure so nothing tries to connect ---
+  @MockBean RabbitTemplate rabbitTemplate;
+  @MockBean ConnectionFactory rabbitConnectionFactory;
+  @MockBean AmqpAdmin amqpAdmin;
 
   // Postgres container for JPA
   @Container
@@ -36,22 +46,22 @@ class AuthAndTasksFlowIT {
           .withUsername("postgres")
           .withPassword("postgres");
 
-  // RabbitMQ container (only needed if your app connects to RabbitMQ on startup)
-  @Container
-  static RabbitMQContainer rabbit = new RabbitMQContainer("rabbitmq:3.13-alpine");
-
   @DynamicPropertySource
   static void registerProps(DynamicPropertyRegistry r) {
-    // Datasource props
+    // Datasource props from Testcontainers Postgres
     r.add("spring.datasource.url", postgres::getJdbcUrl);
     r.add("spring.datasource.username", postgres::getUsername);
     r.add("spring.datasource.password", postgres::getPassword);
 
-    // RabbitMQ props (skip if your app no longer requires it)
-    r.add("spring.rabbitmq.host", rabbit::getHost);
-    r.add("spring.rabbitmq.port", rabbit::getAmqpPort);
+    // Hard-disable Rabbit auto-config in this test context
+    r.add("spring.autoconfigure.exclude",
+        () -> "org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration");
 
-    // JWT secret is provided by src/test/resources/application-test.properties
+    // Extra safety: ensure any listeners/templates won't auto-start
+    r.add("spring.rabbitmq.listener.simple.auto-startup", () -> "false");
+    r.add("spring.rabbitmq.listener.direct.auto-startup", () -> "false");
+    r.add("spring.rabbitmq.publisher-confirm-type", () -> "none");
+    r.add("spring.rabbitmq.publisher-returns", () -> "false");
   }
 
   @LocalServerPort
