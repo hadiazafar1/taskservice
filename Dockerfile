@@ -2,13 +2,14 @@
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /src
 COPY . .
-# build only the module (adjust name if different)
-RUN mvn -q -DskipTests -pl taskservice -am package
+
+# build only the taskservice module, verbose logs, and skip tests/ITs in image build
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -f taskservice/pom.xml -DskipTests -DskipITs package
 
 # ---- runtime stage ----
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-# copy the jar produced by the module
 COPY --from=build /src/taskservice/target/*.jar /app/app.jar
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]
