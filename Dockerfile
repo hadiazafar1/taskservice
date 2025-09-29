@@ -1,16 +1,14 @@
-# Dockerfile
+# ---- build stage ----
+FROM maven:3.9.9-eclipse-temurin-21 AS build
+WORKDIR /src
+COPY . .
+# build only the module (adjust name if different)
+RUN mvn -q -DskipTests -pl taskservice -am package
 
-# Use a lightweight Java image
-FROM eclipse-temurin:21-jdk-alpine
-
-# Set app directory
+# ---- runtime stage ----
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-
-# Copy the built jar file
-COPY target/taskservice-0.0.1-SNAPSHOT.jar app.jar
-
-# Expose port (change if needed)
+# copy the jar produced by the module
+COPY --from=build /src/taskservice/target/*.jar /app/app.jar
 EXPOSE 8080
-
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]
