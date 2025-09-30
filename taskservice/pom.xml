@@ -46,13 +46,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		<dependency>
-  <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-starter-amqp</artifactId>
-</dependency>
-
-
-
+	
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -104,7 +98,37 @@
   <version>3.25.3</version>
   <scope>test</scope>
 </dependency>
-		
+
+<!-- Health, readiness, metrics endpoints -->
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+<!-- JSON logs (Logback encoder) -->
+<dependency>
+  <groupId>net.logstash.logback</groupId>
+  <artifactId>logstash-logback-encoder</artifactId>
+  <version>7.4</version>
+</dependency>
+
+<dependency>
+  <groupId>software.amazon.awssdk</groupId>
+  <artifactId>sqs</artifactId>
+  <version>2.25.48</version>
+</dependency>
+		<!-- Email via SMTP (local dev with MailHog) -->
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-mail</artifactId>
+</dependency>
+
+<!-- Email via AWS SES v2 (for aws profile) -->
+<dependency>
+  <groupId>software.amazon.awssdk</groupId>
+  <artifactId>sesv2</artifactId>
+  <version>2.25.48</version>
+</dependency>
 	</dependencies>
 
 	<build>

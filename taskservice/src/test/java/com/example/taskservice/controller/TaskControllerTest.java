@@ -36,8 +36,8 @@ public class TaskControllerTest {
     @Test
     void testCreateTask() throws Exception {
         // Create a TaskRequest object and mock the service call
-        TaskRequest request = new TaskRequest("Test Task", "Description", "OPEN", "HIGH", LocalDateTime.now());
-         Task task = new Task(1L,request.title, request.description, request.status, request.priority, request.dueDate);
+        TaskRequest request = new TaskRequest("Test Task", "Description", "OPEN", "HIGH", LocalDateTime.now(),"test@example.com");
+        Task task = new Task(1L,request.title, request.description, request.status, request.priority, request.dueDate, request.assigneeEmail);
         // Mock the service response
         when(taskService.createTask(any(TaskRequest.class))).thenReturn(task);
 

@@ -1,20 +1,19 @@
 package com.example.taskservice.messaging;
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 
 @Component
 public class TaskEventPublisher {
 
-    private final RabbitTemplate rabbitTemplate;
+     private final MessagingPort messaging;
 
-    public TaskEventPublisher(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
+    public TaskEventPublisher(MessagingPort messaging) {
+        this.messaging = messaging;
     }
 
     public void publishTaskCreated(TaskCreatedEvent event) {
-        rabbitTemplate.convertAndSend("task.queue", event);
+        messaging.publish("task.queue", event);
     }
 
 }

@@ -26,17 +26,20 @@ public class Task {
 
     private LocalDateTime createdAt;
 
+    private String assigneeEmail;
+
     // Constructors, Getters, Setters
     public Task() {
     }
 
-    public Task(String title, String description, String status, String priority, LocalDateTime dueDate) {
+    public Task(String title, String description, String status, String priority, LocalDateTime dueDate, String assigneeEmail) {
         this.title = title;
         this.description = description;
         this.status = status;
         this.priority = priority;
         this.dueDate = dueDate;
         this.createdAt = LocalDateTime.now();
+        this.assigneeEmail = assigneeEmail;
     }
 
     // Getters and setters (or use Lombok if added)
@@ -44,7 +47,8 @@ public class Task {
     public Task(long l, String title2, String description2,
             String status2,
             String priority2,
-            LocalDateTime dueDate2) {
+            LocalDateTime dueDate2,
+            String assigneeEmail2) {
         //TODO Auto-generated constructor stub
         this.id = l;
         this.title = title2;        
@@ -52,6 +56,8 @@ public class Task {
         this.status = status2;
         this.priority = priority2;
         this.dueDate = dueDate2;
+        this.assigneeEmail = assigneeEmail2;
+        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -108,5 +114,12 @@ public class Task {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getAssigneeEmail() {
+        return assigneeEmail;
+    }   
+    public void setAssigneeEmail(String assigneeEmail) {
+        this.assigneeEmail = assigneeEmail;
     }
 }
